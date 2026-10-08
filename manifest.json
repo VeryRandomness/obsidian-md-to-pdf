@@ -4,6 +4,6 @@
 	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "Export the current note to a nicely styled PDF. Works on desktop and mobile.",
-	"author": "Christopher Butters",
+	"author": "VeryRandomness",
 	"isDesktopOnly": false
 }
