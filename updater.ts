@@ -48,9 +48,12 @@ async function check(plugin: Plugin, repo: string, manual: boolean) {
 		if (!mainJs.trim()) throw new Error("downloaded main.js is empty");
 		let css: string | null = null;
 		try { css = await fetchText(repo, ref, "styles.css"); } catch { /* optional */ }
+		let lib: string | null = null;
+		try { lib = await fetchText(repo, ref, "lib.js"); } catch { /* optional */ }
 
 		const dir = manifest.dir!;
 		const adapter = app.vault.adapter;
+		if (lib !== null) await adapter.write(`${dir}/lib.js`, lib);
 		await adapter.write(`${dir}/main.js`, mainJs);
 		await adapter.write(`${dir}/manifest.json`, remoteManifest);
 		if (css !== null) await adapter.write(`${dir}/styles.css`, css);

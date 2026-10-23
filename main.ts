@@ -1,11 +1,28 @@
 import { App, MarkdownRenderer, Notice, Plugin, TFile } from "obsidian";
 import { setupAutoUpdate } from "./updater";
-// jspdf and html2canvas-pro are ~1MB combined; they're loaded lazily on the
-// first export (see exportToPdf) so they don't add to Obsidian's startup time.
+// jspdf and html2canvas-pro are ~1MB combined. They live in a separate lib.js
+// (see lib.ts) that is read and evaluated on the first export only, so
+// Obsidian never has to read or parse them at startup.
 
 // Must match the `scale` option passed to html2canvas below — used to convert
 // DOM (CSS-pixel) link positions into canvas-pixel positions.
 const RENDER_SCALE = 2;
+
+type Lib = typeof import("./lib");
+let libPromise: Promise<Lib> | null = null;
+
+function loadLib(plugin: Plugin): Promise<Lib> {
+	if (!libPromise) {
+		libPromise = (async () => {
+			const code = await plugin.app.vault.adapter.read(`${plugin.manifest.dir}/lib.js`);
+			const module = { exports: {} as Lib };
+			new Function("module", "exports", code)(module, module.exports);
+			return module.exports;
+		})();
+		libPromise.catch(() => { libPromise = null; });
+	}
+	return libPromise;
+}
 
 interface LinkRect {
 	xPx: number;
@@ -58,10 +75,7 @@ export default class MdToPdfPlugin extends Plugin {
 		document.body.appendChild(container);
 
 		try {
-			const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-				import("jspdf"),
-				import("html2canvas-pro"),
-			]);
+			const { jsPDF, html2canvas } = await loadLib(this);
 
 			const content = await this.app.vault.cachedRead(file);
 			await MarkdownRenderer.render(this.app, content, container, file.path, this);
