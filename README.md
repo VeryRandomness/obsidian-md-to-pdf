@@ -1,5 +1,7 @@
 # MD to PDF Export
 
+> **MD to PDF export is now part of [Vault Management](https://github.com/VeryRandomness/obsidian-vault-management)**, which also includes bullet variants, color swatches, bulk property editing and theme updates. New features and fixes go there; this standalone plugin is no longer developed.
+
 Turn any Obsidian note into a nicely styled PDF with one click. Works on desktop and mobile.
 
 ## Install
